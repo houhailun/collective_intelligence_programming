@@ -28,6 +28,7 @@ from pandas import DataFrame, Series
 from math import sqrt
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+
 class similay:
     """相似度类：欧式距离、皮尔逊相关系数"""
     def sim_distince(self, prefs, person1, person2):
@@ -85,7 +86,7 @@ class UserCF:
     """
     def collectPreferences(self):
         # 搜集偏好，即找不同人对物品的喜好程度
-        critics={'Lisa Rose':
+        critics = {'Lisa Rose':
                     {'Lady in the Water': 2.5, 'Snakes on a Plane': 3.5,
                      'Just My Luck': 3.0, 'Superman Returns': 3.5, 'You, Me and Dupree': 2.5,
                      'The Night Listener': 3.0
@@ -119,8 +120,16 @@ class UserCF:
 
         return critics
 
-    # 为评论者打分，即找最近的K个人
     def topMatches(self, prefs, person, n=5, similarity=similay.sim_pearson):
+        """
+        # 为评论者打分，即找最近的K个人
+        :param prefs: 用户偏好字典
+        :param person: 目标用户
+        :param n: 相似用户个数
+        :param similarity: 相似度准则
+        :return:
+        """
+        # 目标用户和其他用户的相似度
         scores = [(similarity(self, prefs, person, other), other)
                   for other in prefs if other != person]
 
@@ -128,8 +137,14 @@ class UserCF:
         scores.reverse()
         return scores[0:n]
 
-    # 推荐物品
     def getRecommendations(self, prefs, person, sililarity=similay.sim_pearson):
+        """
+        给目标用户推荐物品
+        :param prefs: 用户偏好字典
+        :param person: 目标用户
+        :param sililarity: 相似度准则
+        :return:
+        """
         totals = {}
         simSum = {}
         for other in prefs:
@@ -137,10 +152,11 @@ class UserCF:
             if other == person:
                 continue
 
-            # 忽略评价值小于等于0的情况
+            # 目标用户和other用户的相似度，忽略小于等于0的情况
             sim = sililarity(self, prefs, person, other)
             if sim <= 0:
                 continue
+            # 对相似用户评价过的电影进行遍历
             for item in prefs[other]:
                 # 只对自己还未看过的电影进行评价
                 if item not in prefs[person] or prefs[person][item] == 0:
@@ -194,8 +210,13 @@ class ItemCF:
             item_sim[item] = scores
         return item_sim
 
-    # 推荐物品
     def get_recommendations(self, prefs, person):
+        """
+        基于物品的协同过滤主入口函数: 推荐物品
+        :param prefs: 用户对物品的偏好字典
+        :param person: 目标用户
+        :return:
+        """
         totalsim = {}
         simSum = {}
 
